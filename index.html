@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nature in Code</title>
+
+    <script defer src="https://d3js.org/d3.v4.min.js"></script>
+    <script defer src="helpers.js"></script>
+    <script>
+        const afterDeferred = function(fn) {
+            if (document.readyState !== `loading`) {
+                fn();
+            } else {
+                document.addEventListener(`DOMContentLoaded`, fn);
+            }
+        }
+
+        afterDeferred(function() {
+           const N = 1000;
+           const generations = 1000;
+           const data = [];
+           let p = 0.5;
+           for (let i = 0; i < generations; i += 1) {
+               const draws = 2 * N;
+               let a1 = 0;
+               for (let j = 0; j < draws; j += 1) {
+                   if (Math.random() < p) a1 += 1;
+               }
+               p = a1 / draws;
+               data.push(p);
+           }
+           const legendValues = [`Population Size:`, N, `Generations:`, generations];
+           drawLineChart(`#geneticDriftChart`, data, `Generation`, `p`, legendValues);
+        });
+    </script>
+</head>
+<body>
+<div id="geneticDriftChart"></div>
+</body>
+</html>
