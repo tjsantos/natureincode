@@ -112,7 +112,7 @@ function drawLineChart(selector, data,x_label,y_label,legend_values,x_max,y_max_
             .style("stroke-width", "1px");
     }
 
-    d3.select("body").style("font","10px sans-serif");
+    d3.select(selector).style("font","10px sans-serif");
     d3.selectAll(".axis line").style("stroke","#000"); 
     d3.selectAll(".y.axis path").style("display","none"); 
     d3.selectAll(".x.axis path").style("display","none");    
