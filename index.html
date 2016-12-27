@@ -33,7 +33,8 @@
                 document.querySelector(`#geneticDriftChart`).innerHTML = ``;
                 const legendValues = [`Population Size:`, N, `Generations:`, generations];
                 drawLineChart(`#geneticDriftChart`, data, `Generation`, `p`, legendValues);
-            };
+            }
+
             document.querySelector(`#geneticDrift button`)
                 .addEventListener(`click`, (e) => geneticDrift());
             geneticDrift();
