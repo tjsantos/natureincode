@@ -42,7 +42,7 @@ function drawLineChart(selector, data,x_label,y_label,legend_values,x_max,y_max_
         .y(function (d) {
             return y(d);
         });
-        
+
     var svg = d3.select(selector).append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -112,13 +112,13 @@ function drawLineChart(selector, data,x_label,y_label,legend_values,x_max,y_max_
             .style("stroke-width", "1px");
     }
 
-    d3.select(selector).style("font","10px sans-serif");
-    d3.selectAll(".axis line").style("stroke","#000"); 
-    d3.selectAll(".y.axis path").style("display","none"); 
-    d3.selectAll(".x.axis path").style("display","none");    
-    d3.selectAll(".legend_title")
+    svg.style("font","10px sans-serif");
+    svg.selectAll(".axis line").style("stroke","#000");
+    svg.selectAll(".y.axis path").style("display","none");
+    svg.selectAll(".x.axis path").style("display","none");
+    svg.selectAll(".legend_title")
         .style("font-size","12px").style("fill","#555").style("font-weight","400");
-    d3.selectAll(".legend_text")
+    svg.selectAll(".legend_text")
         .style("font-size","20px").style("fill","#bbb").style("font-weight","700");
 
     if (data[0].length > 0) {
@@ -141,15 +141,15 @@ function drawLineChart(selector, data,x_label,y_label,legend_values,x_max,y_max_
             .attr("d", line)
             .style("stroke","steelblue");
     }
-    d3.selectAll(".line").style("fill", "none").style("stroke-width","1.5px");    
+    svg.selectAll(".line").style("fill", "none").style("stroke-width","1.5px");
 }
 
-function draw_grid(data,colors) {
+function draw_grid(selector, data, colors) {
     var width = 600;
     var height = 600;
     var grid_length = data.length;
 
-    var svg = d3.select('body').append('svg')
+    var svg = d3.select(selector).append('svg')
           .attr('width', width)
           .attr('height', height);
 
@@ -179,20 +179,21 @@ function draw_grid(data,colors) {
               return d;
             });
     if (!colors) {
-    	d3.selectAll(".A1A1").style("fill","#fff");
-        d3.selectAll(".A1A2").style("fill","#2176c9");
-        d3.selectAll(".A2A2").style("fill","#042029");
+    	svg.selectAll(".A1A1").style("fill","#fff");
+        svg.selectAll(".A1A2").style("fill","#2176c9");
+        svg.selectAll(".A2A2").style("fill","#042029");
     }
     else {
         for (var i = 0; i < colors.length; i = i + 2) {
-            d3.selectAll("."+colors[i]).style("fill",colors[i+1]);
+            svg.selectAll("."+colors[i]).style("fill",colors[i+1]);
         }
     }
 }
 
-function update_grid(data,colors){
+function update_grid(selector, data, colors){
     var grid_length = data.length;
-    d3.select('svg').selectAll('g')
+    let svg = d3.select(selector).select(`svg`);
+    svg.selectAll('g')
         .data(data)
         .selectAll('rect')
         .data(function (d) {
@@ -202,13 +203,13 @@ function update_grid(data,colors){
           return d;
         });
     if (!colors) {
-    	d3.selectAll(".A1A1").style("fill","#fff");
-        d3.selectAll(".A1A2").style("fill","#2176c9");
-        d3.selectAll(".A2A2").style("fill","#042029");
+    	svg.selectAll(".A1A1").style("fill","#fff");
+        svg.selectAll(".A1A2").style("fill","#2176c9");
+        svg.selectAll(".A2A2").style("fill","#042029");
     }
     else {
         for (var i = 0; i < colors.length; i = i + 2) {
-            d3.selectAll("."+colors[i]).style("fill",colors[i+1]);
+            svg.selectAll("."+colors[i]).style("fill",colors[i+1]);
         }
     }
 }
