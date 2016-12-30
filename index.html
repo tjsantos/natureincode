@@ -6,56 +6,19 @@
 
     <script defer src="https://d3js.org/d3.v4.min.js"></script>
     <script defer src="helpers.js"></script>
-    <script>
-        const afterDeferred = function (fn) {
-            if (document.readyState !== `loading`) {
-                fn();
-            } else {
-                document.addEventListener(`DOMContentLoaded`, fn);
-            }
-        };
-
-        afterDeferred(() => {
-
-            function geneticDrift(populationSize, generations) {
-                const data = [];
-                let p = 0.5;
-                for (let i = 0; i < generations; i += 1) {
-                    const draws = 2 * populationSize;
-                    let a1 = 0;
-                    for (let j = 0; j < draws; j += 1) {
-                        if (Math.random() < p) a1 += 1;
-                    }
-                    p = a1 / draws;
-                    data.push(p);
-                }
-                document.querySelector(`#geneticDriftChart`).innerHTML = ``;
-                const legendValues = [`Population Size:`, populationSize, `Generations:`, generations];
-                drawLineChart(`#geneticDriftChart`, data, `Generation`, `p`, legendValues);
-            }
-
-            let runButton = document.querySelector(`#geneticDrift button[name="run"]`);
-            runButton.addEventListener(`click`, (event) => {
-                let form = event.currentTarget.form;
-                let valid = form.reportValidity();
-                if (valid) {
-                    let data = new FormData(form);
-                    geneticDrift(+data.get(`populationSize`), +data.get(`generations`));
-                }
-            });
-            runButton.click();
-        });
-    </script>
+    <script defer src="main.js"></script>
 </head>
 <body>
-<section id="geneticDrift">
-    <h2>Genetic Drift</h2>
+<article id="geneticDrift">
+    <header>
+        <h2>Genetic Drift</h2>
+    </header>
+    <p>
+        This graph shows the frequency of a neutral allele (p) over time,
+        based on a "one locus, two alleles" model.
+    </p>
     <div id="geneticDriftChart"></div>
     <form>
-        <p>
-            This graph shows the frequency of a neutral allele (p) over time,
-            based on a "one locus, two alleles" model.
-        </p>
         <p>
             <label>Population Size: <input name="populationSize" type="number" value="1000" min="0"></label>
             <label>Generations: <input name="generations" type="number" value="1000" min="0"></label>
@@ -63,6 +26,6 @@
             <button name="run" type="button">Run</button>
         </p>
     </form>
-</section>
+</article>
 </body>
 </html>
