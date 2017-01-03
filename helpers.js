@@ -2,6 +2,15 @@
 /*
 * original code from natureincode.com
 * adapted by TJ Santos
+*
+* TODO: refactor into reusable charts (see https://bost.ocks.org/mike/chart/)
+* - ability to add labels?
+* - ability to bind data to selection, then use pattern:
+* function chart(selection) {
+*   selection.each(function (data) {
+*     ...render data...
+*   }
+* }
 * */
 function drawLineChart(selection, data,x_label,y_label,legend_values,x_max,y_max_flex) {
     var margin = {top: 20, right: 20, bottom: 50, left: 50},
