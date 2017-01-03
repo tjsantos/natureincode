@@ -145,12 +145,12 @@ function drawLineChart(selection, data,x_label,y_label,legend_values,x_max,y_max
     svg.selectAll(".line").style("fill", "none").style("stroke-width","1.5px");
 }
 
-function draw_grid(selector, data, colors) {
+function draw_grid(selection, data, colors) {
     var width = 600;
     var height = 600;
     var grid_length = data.length;
 
-    var svg = d3.select(selector).append('svg')
+    var svg = selection.append('svg')
           .attr('width', width)
           .attr('height', height);
 
@@ -191,9 +191,9 @@ function draw_grid(selector, data, colors) {
     }
 }
 
-function update_grid(selector, data, colors){
+function update_grid(selection, data, colors){
     var grid_length = data.length;
-    let svg = d3.select(selector).select(`svg`);
+    let svg = selection.select(`svg`);
     svg.selectAll('g')
         .data(data)
         .selectAll('rect')

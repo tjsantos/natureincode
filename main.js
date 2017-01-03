@@ -1,5 +1,7 @@
 
 
+/* --- Genetic Drift --- */
+
 function geneticDrift(populationSize, generations) {
     const data = [];
     let p = 0.5;
@@ -22,7 +24,7 @@ runButton.addEventListener(`click`, (event) => {
     let form = event.currentTarget.form;
     let valid = form.reportValidity();
     if (valid) {
-        // obtain parameters from form
+        // obtain arguments from form
         const formData = new FormData(form);
         const populationSize = +formData.get(`populationSize`);
         const generations = +formData.get(`generations`);
@@ -39,22 +41,39 @@ runButton.addEventListener(`click`, (event) => {
 runButton.click();
 
 
-var grid_length = 75;
-// Note that grid_length in the book is 100.
-// I reduced it here for smooth performance on mobile devices.
-var p = 0.5;
-var grid = [];
-var max_mating_distance = 1; // change to 50 for global mating
-var A1A1 = 0;
-var A1A2 = 0;
-var A2A2 = 0;
-var generation_counter = 0;
+/* --- Migration --- */
 
-function init_grid() {
-    for (var i = 0; i < grid_length; i = i + 1) {
+/* a grid is a 2d-array of diploid organisms: `A1A1`, `A1A2`, or `A2A2`
+*  with an additional property: `generation_counter`
+*/
+let grid_length = 75;
+let p = 0.5;
+let mating_distance = 1;
+let interval = 1000;
+
+let grid = init_grid(grid_length, p);
+d3.select(`#migrationGrid`)
+    .call(draw_grid, grid);
+
+function simulate_and_visualize() {
+    // update the grid
+    grid = run_generation(grid, mating_distance);
+    // render/visualize
+    d3.select(`#migrationGrid`)
+        .call(update_grid, grid);
+}
+setInterval(simulate_and_visualize, interval);
+
+
+function init_grid(grid_length, p) {
+    let grid = [];
+    let A1A1 = 0;
+    let A1A2 = 0;
+    let A2A2 = 0;
+    for (let i = 0; i < grid_length; i = i + 1) {
         grid[i] = [];
-        for (var ii = 0; ii < grid_length; ii = ii + 1) {
-            var random_number = Math.random();
+        for (let ii = 0; ii < grid_length; ii = ii + 1) {
+            const random_number = Math.random();
             if (random_number < p*p) {
                 grid[i][ii] = "A1A1";
                 A1A1 = A1A1 + 1;
@@ -70,62 +89,51 @@ function init_grid() {
         }
     }
     console.log(A1A1, A1A2, A2A2);
+    grid.generation_counter = 0;
+    return grid;
 }
 
-init_grid();
-
-draw_grid(`#migrationGrid`, grid);
-
-function simulate_and_visualize() {
-    run_generation();
-    update_grid(`#migrationGrid`, grid);
-}
-setInterval(simulate_and_visualize, 1000);
-
-function run_generation() {
-    var temp_grid = [];
-    for (var i = 0; i < grid_length; i = i + 1) {
-        temp_grid[i] = [];
-        for (var ii = 0; ii < grid_length; ii = ii + 1) {
-            var mating_partner = pick_mating_partner(i,ii);
-            temp_grid[i][ii] = get_offspring(grid[i][ii],mating_partner);
+function run_generation(grid, mating_distance) {
+    const new_grid = [];
+    for (let i = 0; i < grid.length; i = i + 1) {
+        new_grid[i] = [];
+        for (let j = 0; j < grid.length; j = j + 1) {
+            const mating_partner = pick_mating_partner(grid, i, j, mating_distance);
+            new_grid[i][j] = get_offspring(grid[i][j], mating_partner);
         }
     }
-    for (i = 0; i < grid_length; i = i + 1) {
-        for (ii = 0; ii < grid_length; ii = ii + 1) {
-            grid[i][ii] = temp_grid[i][ii];
-        }
-    }
-    print_data();
-    generation_counter = generation_counter + 1;
+    new_grid.generation_counter = grid.generation_counter + 1;
+
+    print_data(new_grid);
+    return new_grid;
 }
 
 function get_random_int(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function get_bounded_index(index) {
-    var bounded_index = index;
+function get_bounded_index(index, modulus) {
+    let bounded_index = index;
     if (index < 0) {
-        bounded_index = index + grid_length;
+        bounded_index = index + modulus;
     }
-    if (index >= grid_length) {
-        bounded_index = index - grid_length;
+    if (index >= modulus) {
+        bounded_index = index - modulus;
     }
     return bounded_index;
 }
 
-function pick_mating_partner(i, ii) {
-    var j   = get_random_int(i-max_mating_distance, i+max_mating_distance);
-    var jj  = get_random_int(ii-max_mating_distance, ii+max_mating_distance);
-    j  = get_bounded_index(j);
-    jj = get_bounded_index(jj);
-    return grid[j][jj];
+function pick_mating_partner(grid, i, j, mating_distance) {
+    let new_i = get_random_int(i - mating_distance, i + mating_distance);
+    let new_j = get_random_int(j - mating_distance, j + mating_distance);
+    new_i  = get_bounded_index(new_i, grid.length);
+    new_j = get_bounded_index(new_j, grid.length);
+    return grid[new_i][new_j];
 }
 
 function get_offspring(parent1, parent2) {
-    var p1 = parent1;
-    var p2 = parent2;
+    const p1 = parent1;
+    const p2 = parent2;
     if (p1 == "A1A1" && p2 == "A1A1") {
         return "A1A1";
     }
@@ -141,7 +149,7 @@ function get_offspring(parent1, parent2) {
         return "A1A2";
     }
     else if (p1 == "A1A2" && p2 == "A1A2") {
-        var random_number = Math.random();
+        const random_number = Math.random();
         if (random_number < 0.25) {
             return "A1A1";
         }
@@ -165,12 +173,12 @@ function get_offspring(parent1, parent2) {
     }
  }
 
- function print_data() {
-    A1A1 = 0;
-    A1A2 = 0;
-    A2A2 = 0;
-    for (var i = 0; i < grid_length; i = i + 1) {
-        for (var ii = 0; ii < grid_length; ii = ii + 1) {
+ function print_data(grid) {
+    let A1A1 = 0;
+    let A1A2 = 0;
+    let A2A2 = 0;
+    for (let i = 0; i < grid.length; i = i + 1) {
+        for (let ii = 0; ii < grid.length; ii = ii + 1) {
             if (grid[i][ii] == "A1A1") {
                 A1A1 = A1A1 + 1;
             }
@@ -182,12 +190,12 @@ function get_offspring(parent1, parent2) {
             }
         }
     }
-    console.log("generation " + generation_counter + ":");
+    console.log("generation " + grid.generation_counter + ":");
     console.log(A1A1, A1A2, A2A2);
-    var N = A1A1 + A1A2 + A2A2;
-    var h_o = A1A2 / N;
-    var p = ((2 * A1A1) + A1A2) / (2 * N);
-    var h_e = 2 * p * (1-p);
-    var F = (h_e - h_o) / h_e;
+    const N = A1A1 + A1A2 + A2A2;
+    const h_o = A1A2 / N;
+    const p = ((2 * A1A1) + A1A2) / (2 * N);
+    const h_e = 2 * p * (1 - p);
+    const F = (h_e - h_o) / h_e;
     console.log("F = " + F);
 }
