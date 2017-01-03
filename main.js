@@ -12,18 +12,28 @@ function geneticDrift(populationSize, generations) {
         p = a1 / draws;
         data.push(p);
     }
-    document.querySelector(`#geneticDriftChart`).innerHTML = ``;
-    const legendValues = [`Population Size:`, populationSize, `Generations:`, generations];
-    drawLineChart(`#geneticDriftChart`, data, `Generation`, `p`, legendValues);
+
+    return data;
 }
 
 let runButton = document.querySelector(`#geneticDrift button[name="run"]`);
 runButton.addEventListener(`click`, (event) => {
+    // validate the form
     let form = event.currentTarget.form;
     let valid = form.reportValidity();
     if (valid) {
-        let data = new FormData(form);
-        geneticDrift(+data.get(`populationSize`), +data.get(`generations`));
+        // obtain parameters from form
+        const formData = new FormData(form);
+        const populationSize = +formData.get(`populationSize`);
+        const generations = +formData.get(`generations`);
+
+        // run the simulation
+        let driftData = geneticDrift(populationSize, generations);
+
+        // render/visualize the results
+        const legendValues = [`Population Size:`, populationSize, `Generations:`, generations];
+        d3.select(`#geneticDriftChart`)
+            .call(drawLineChart, driftData, `Generation`, `p`, legendValues)
     }
 });
 runButton.click();
@@ -70,7 +80,7 @@ function simulate_and_visualize() {
     run_generation();
     update_grid(`#migrationGrid`, grid);
 }
-setInterval(simulate_and_visualize, 500);
+setInterval(simulate_and_visualize, 1000);
 
 function run_generation() {
     var temp_grid = [];
