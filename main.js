@@ -56,25 +56,21 @@
     let p = 0.5;
     let matingDistance;
     let interval;
-    let intervalId;
+    let eventId;
 
     // interactive inputs
 
     // mating distance and interval
     document.querySelector(`#migration form`)
         .addEventListener(`input`, function (event) {
+            // set state from form
             const form = event.currentTarget;
             const fd = new FormData(form);
             const intervalSeconds = +fd.get(`interval`);
-            const newInterval = intervalSeconds * 1000;
-            if (interval !== newInterval) {
-                clearInterval(intervalId);
-                interval = newInterval;
-                intervalId = setInterval(update, interval);
-            }
+            interval = intervalSeconds * 1000;
             matingDistance = +fd.get(`matingDistance`);
 
-            // reflect the new values on the form
+            // reflect the new state on the form
             form.querySelector(`output[for="matingDistance"]`)
                 .value = matingDistance;
             form.querySelector(`output[for="interval"]`)
@@ -83,24 +79,25 @@
     // restart/pause/play
     document.querySelector(`#migrationRestart`)
         .addEventListener(`click`, function (event) {
+            // make restart button an input event (state variables should update)
+            event.currentTarget.form.dispatchEvent(new Event(`input`));
+
             restart(gridLength, p);
         });
     document.querySelector(`#migrationPause`)
         .addEventListener(`click`, function (event) {
-            if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null;
+            if (eventId) {
+                clearTimeout(eventId);
+                eventId = null;
             } else {
                 update();
-                intervalId = setInterval(update, interval);
             }
         });
 
     // run the simulation
 
-    document.querySelector(`#migration form`)
-        .dispatchEvent(new Event(`input`));
-    restart(gridLength, p);
+    document.querySelector(`#migrationRestart`)
+        .click();
 
     // helper functions
 
@@ -109,14 +106,16 @@
         d3.select(`#migrationGrid`)
             .call(render, grid);
 
-        clearInterval(intervalId);
-        intervalId = setInterval(update, interval);
+        clearTimeout(eventId);
+        eventId = setTimeout(update, interval);
     }
 
     function update() {
         grid = nextGrid(grid, matingDistance);
         d3.select(`#migrationGrid`)
             .call(render, grid);
+
+        eventId = setTimeout(update, interval);
     }
 
     function render(selection, grid) {
@@ -129,11 +128,11 @@
         const {A1A1, A1A2, A2A2} = grid;
         const F = calculateF(A1A1, A1A2, A2A2);
         document.querySelector(`#migrationInfo`)
-            .textContent = `Generation: ${grid.generationCounter}, F: ${roundApprox(F, 4)}`;
+            .textContent = `Generation: ${grid.generationCounter}, F: ${F.toFixed(2)}`;
 
-        console.log("generation " + grid.generationCounter + ":");
-        console.log(A1A1, A1A2, A2A2);
-        console.log("F = " + F);
+        //console.log("generation " + grid.generationCounter + ":");
+        //console.log(A1A1, A1A2, A2A2);
+        //console.log("F = " + F);
     }
 
     function initGrid(gridLength, p) {
