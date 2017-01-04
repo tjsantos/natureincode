@@ -202,14 +202,7 @@
     }
 
     function getBoundedIndex(index, modulus) {
-        let boundedIndex = index;
-        if (index < 0) {
-            boundedIndex = index + modulus;
-        }
-        if (index >= modulus) {
-            boundedIndex = index - modulus;
-        }
-        return boundedIndex;
+        return ((index % modulus) + modulus) % modulus;
     }
 
     function pickMatingPartner(grid, i, j, matingDistance) {
