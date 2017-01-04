@@ -159,6 +159,7 @@ function draw_grid(selection, data, colors) {
     var height = 600;
     var grid_length = data.length;
 
+    selection.selectAll(`*`).remove();
     var svg = selection.append('svg')
           .attr('width', width)
           .attr('height', height);
