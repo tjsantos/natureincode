@@ -96,8 +96,8 @@
 
     // run the simulation
 
-    document.querySelector(`#migrationRestart`)
-        .click();
+    // document.querySelector(`#migrationRestart`)
+    //     .click();
 
     // helper functions
 
@@ -196,14 +196,6 @@
         return newGrid;
     }
 
-    function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    function getBoundedIndex(index, modulus) {
-        return ((index % modulus) + modulus) % modulus;
-    }
-
     function pickMatingPartner(grid, i, j, matingDistance) {
         let new_i = getRandomInt(i - matingDistance, i + matingDistance);
         let new_j = getRandomInt(j - matingDistance, j + matingDistance);
@@ -274,105 +266,77 @@
 /* --- Epidemics --- */
 (function setUpEpidemics() {
     "use strict";
-        
-    var grid_length = 75;
-    // Note that grid_length in the book is 100.
-    // I reduced it here for smooth performance on mobile devices.
-    var grid = [];
-    var temp_grid = [];
-    var beta = 0.05;
-    var gamma = 0.15;
 
-    function get_random_int(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+    let grid;
+    let gridLength = 75;
+    let pInfect = 0.05;
+    let pRecover = 0.15;
+    let pInfectRandom = 0.01;
+    let interval = 50;
+
+    grid = newGrid(gridLength);
+    d3.select(`#epidemicsGrid`)
+        .call(drawGrid, grid,["S","#dcdcdc","I","#c82605","R","#6fc041"]);
+
+    function simulateAndVisualize() {
+        grid = nextGrid(grid);
+        d3.select(`#epidemicsGrid`)
+            .call(updateGrid, grid, ["S","#dcdcdc","I","#c82605","R","#6fc041"]);
     }
 
-    function init_grid() {
-        for (var i = 0; i < grid_length; i = i + 1) {
+    setInterval(simulateAndVisualize, interval);
+
+
+    function newGrid(gridLength) {
+        let grid = [];
+        for (let i = 0; i < gridLength; i = i + 1) {
             grid[i] = [];
-            for (var ii = 0; ii < grid_length; ii = ii + 1) {
+            for (let ii = 0; ii < gridLength; ii = ii + 1) {
                grid[i][ii] = "S";
             }
         }
-        grid[get_random_int(0,grid_length-1)][get_random_int(0,grid_length-1)] = "I";
+        grid[getRandomInt(0,gridLength-1)][getRandomInt(0,gridLength-1)] = "I";
+        return grid;
     }
 
-    init_grid();
-
-    draw_grid(grid,["S","#dcdcdc","I","#c82605","R","#6fc041"]);
-
-    function simulate_and_visualize() {
-        run_time_step();
-        update_grid(grid,["S","#dcdcdc","I","#c82605","R","#6fc041"]);
-    }
-
-    setInterval(simulate_and_visualize, 50);
-
-    function run_time_step() {
-        for (var i = 0; i < grid_length; i = i + 1) {
-            temp_grid[i] = [];
-            for (var ii = 0; ii < grid_length; ii = ii + 1) {
-                temp_grid[i][ii] = grid[i][ii];
+    function nextGrid(grid) {
+        const gridLength = grid.length;
+        let resultGrid = [];
+        for (let i = 0; i < gridLength; i = i + 1) {
+            resultGrid[i] = [];
+            for (let j = 0; j < gridLength; j = j + 1) {
+                resultGrid[i][j] = grid[i][j];
             }
         }
-        for (i = 0; i < grid_length; i = i + 1) {
-            for (ii = 0; ii < grid_length; ii = ii + 1) {
-                if (grid[i][ii] == "I") {
-                    expose_neighbors(i,ii);
-                    try_recovery(i,ii);
+        for (let i = 0; i < gridLength; i = i + 1) {
+            for (let j = 0; j < gridLength; j = j + 1) {
+                if (grid[i][j] === "I") {
+                    // expose neighbors
+                    for (let di of [-1, 0, 1]) {
+                        for (let dj of [-1, 0, 1]) {
+                            const ni = getBoundedIndex(i + di, gridLength);
+                            const nj = getBoundedIndex(j + dj, gridLength);
+                            if (grid[ni][nj] === "S" && Math.random() < pInfect) {
+                                resultGrid[ni][nj] = "I";
+                            }
+                        }
+                    }
+                    // long distance transmission
+                    if (Math.random() < pInfectRandom) {
+                        const ri = getRandomInt(0, gridLength - 1);
+                        const rj = getRandomInt(0, gridLength - 1);
+                        if (grid[ri][rj] === `S`) {
+                            resultGrid[ri][rj] = `I`;
+                        }
+                    }
+                    // attempt recovery
+                    if (Math.random() < pRecover) {
+                        resultGrid[i][j] = `R`;
+                    }
                 }
             }
         }
-        for (i = 0; i < grid_length; i = i + 1) {
-            for (ii = 0; ii < grid_length; ii = ii + 1) {
-                grid[i][ii] = temp_grid[i][ii];
-            }
-        }
-    }
-
-    function expose_neighbors(i,ii) {
-        for (var n_i = i-1; n_i <= i+1; n_i = n_i + 1) {
-            for (var n_ii = ii-1; n_ii <= ii+1; n_ii = n_ii + 1) {
-                if (n_i == i && n_ii == ii) {
-                    continue;
-                }
-                if (Math.random() < 0.01) {
-                    var random_i = get_bounded_index(get_random_int(0,grid_length-1));
-                    var random_ii = get_bounded_index(get_random_int(0,grid_length-1));
-                    try_infection(random_i, random_ii);
-                }
-                else {
-                    try_infection(get_bounded_index(n_i),get_bounded_index(n_ii));
-                }
-            }
-        }
-    }
-
-    function get_bounded_index(index) {
-        var bounded_index = index;
-        if (index < 0) {
-            bounded_index = index + grid_length;
-        }
-        if (index >= grid_length) {
-            bounded_index = index - grid_length;
-        }
-        return bounded_index;
-    }
-
-    function try_infection(i,ii) {
-        if (grid[i][ii] == "S") {
-            if (Math.random() < beta) {
-                temp_grid[i][ii] = "I";
-            }
-        }
-    }
-
-    function try_recovery(i,ii) {
-        if (grid[i][ii] == "I") {
-            if (Math.random() < gamma) {
-               temp_grid[i][ii] = "R";
-            }
-        }
+        return resultGrid;
     }
 
 })();
