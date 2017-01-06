@@ -266,26 +266,55 @@
 /* --- Epidemics --- */
 (function setUpEpidemics() {
     "use strict";
-
+    // state variables
     let grid;
     let gridLength = 75;
     let pInfect = 0.05;
     let pRecover = 0.15;
     let pInfectRandom = 0.01;
-    let interval = 50;
+    let interval = 200;
+    let timer;
 
-    grid = newGrid(gridLength);
-    d3.select(`#epidemicsGrid`)
-        .call(drawGrid, grid,["S","#dcdcdc","I","#c82605","R","#6fc041"]);
+    // inputs
+    document.querySelector(`#epidemicsRestart`)
+        .addEventListener(`click`, function (event) {
+            grid = newGrid(gridLength);
+            d3.select(`#epidemicsGrid`)
+                .call(drawGrid, grid,["S","#dcdcdc","I","#c82605","R","#6fc041"]);
+            if (timer) timer.stop();
+            timer = d3.interval(update, interval);
+        });
+    document.querySelector(`#epidemics form`)
+        .addEventListener(`input`, function (event) {
+            const form = event.currentTarget;
+            if (!form.reportValidity()) {
+                return;
+            }
 
-    function simulateAndVisualize() {
+            const fd = new FormData(form);
+            // input is in seconds; remember to convert to millis
+            interval = +fd.get(`epidemicsInterval`) * 1000;
+            timer.stop();
+            timer = d3.interval(update, interval);
+        });
+
+
+    // run
+    document.querySelector(`#epidemicsRestart`)
+        .click();
+
+    // helper functions
+
+    function update(elapsed) {
         grid = nextGrid(grid);
         d3.select(`#epidemicsGrid`)
             .call(updateGrid, grid, ["S","#dcdcdc","I","#c82605","R","#6fc041"]);
+
+        console.log(elapsed, grid.infected);
+        if (grid.infected === 0) {
+            timer.stop();
+        }
     }
-
-    setInterval(simulateAndVisualize, interval);
-
 
     function newGrid(gridLength) {
         let grid = [];
@@ -296,20 +325,21 @@
             }
         }
         grid[getRandomInt(0,gridLength-1)][getRandomInt(0,gridLength-1)] = "I";
+        grid.infected = 1;
         return grid;
     }
 
     function nextGrid(grid) {
         const gridLength = grid.length;
-        let resultGrid = [];
+        let resultGrid = new Array(gridLength);
         for (let i = 0; i < gridLength; i = i + 1) {
-            resultGrid[i] = [];
+            resultGrid[i] = new Array(gridLength);
+        }
+        resultGrid.infected = 0;
+
+        for (let i = 0; i < gridLength; i = i + 1) {
             for (let j = 0; j < gridLength; j = j + 1) {
                 resultGrid[i][j] = grid[i][j];
-            }
-        }
-        for (let i = 0; i < gridLength; i = i + 1) {
-            for (let j = 0; j < gridLength; j = j + 1) {
                 if (grid[i][j] === "I") {
                     // expose neighbors
                     for (let di of [-1, 0, 1]) {
@@ -336,6 +366,14 @@
                 }
             }
         }
+        for (let i = 0; i < gridLength; i = i + 1) {
+            for (let j = 0; j < gridLength; j = j + 1) {
+                if (grid[i][j] === `I`) {
+                    resultGrid.infected += 1;
+                }
+            }
+        }
+
         return resultGrid;
     }
 
