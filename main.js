@@ -300,8 +300,8 @@
 
 
     // run
-    document.querySelector(`#epidemicsRestart`)
-        .click();
+    // document.querySelector(`#epidemicsRestart`)
+    //     .click();
 
     // helper functions
 

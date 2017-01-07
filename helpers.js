@@ -22,47 +22,47 @@ function getBoundedIndex(index, modulus) {
 }
 
 function drawLineChart(selection, data,x_label,y_label,legend_values,x_max,y_max_flex) {
-    var margin = {top: 20, right: 20, bottom: 50, left: 50},
-        width = 700 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
+    const margin = {top: 20, right: 20, bottom: 50, left: 50},
+        width = 700 - margin.left - margin.right;
+    let height = 400 - margin.top - margin.bottom;
 
-    var version = d3.scale ? 3 : 4;
-    var color = (version == 3 ? d3.scale.category10() : d3.scaleOrdinal(d3.schemeCategory10));
+    const version = d3.scale ? 3 : 4;
+    const color = (version == 3 ? d3.scale.category10() : d3.scaleOrdinal(d3.schemeCategory10));
                 
     if (!x_max) {
         x_max = data[0].length > 0 ? data[0].length : data.length
     }
                 
-    var y_max = data[0].length > 0 ? d3.max(data, function(array) {
+    const y_max = data[0].length > 0 ? d3.max(data, function (array) {
             return d3.max(array);
         }) : d3.max(data);
 
-    var x = (version == 3 ? d3.scale.linear() : d3.scaleLinear())
-        .domain([0,x_max])
+    const x = (version == 3 ? d3.scale.linear() : d3.scaleLinear())
+        .domain([0, x_max])
         .range([0, width]);
 
-    var y = y_max_flex ? (version == 3 ? d3.scale.linear() : d3.scaleLinear())
+    const y = y_max_flex ? (version == 3 ? d3.scale.linear() : d3.scaleLinear())
         .domain([0, 1.1 * y_max])
         .range([height, 0]) : (version == 3 ? d3.scale.linear() : d3.scaleLinear())
         .range([height, 0]);
         
-    var xAxis = (version == 3 ? d3.svg.axis().scale(x).orient("bottom") : 
-    	d3.axisBottom().scale(x));
+    const xAxis = (version == 3 ? d3.svg.axis().scale(x).orient("bottom") :
+        d3.axisBottom().scale(x));
 
-    var yAxis = (version == 3 ? d3.svg.axis().scale(y).orient("left") : 
-    	d3.axisLeft().scale(y));
+    const yAxis = (version == 3 ? d3.svg.axis().scale(y).orient("left") :
+        d3.axisLeft().scale(y));
 
-    var line = (version == 3 ? d3.svg.line() : d3.line())
+    const line = (version == 3 ? d3.svg.line() : d3.line())
         .x(function (d, i) {
-            var dat = (data[0].length > 0 ? data[0] : data);
-            return x((i/(dat.length-1)) * x_max);
+            const dat = (data[0].length > 0 ? data[0] : data);
+            return x((i / (dat.length - 1)) * x_max);
         })
         .y(function (d) {
             return y(d);
         });
 
     selection.selectAll(`*`).remove();
-    var svg = selection.append("svg")
+    const svg = selection.append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -92,18 +92,18 @@ function drawLineChart(selection, data,x_label,y_label,legend_values,x_max,y_max
         .text(y_label);
 
     if (legend_values.length > 0) {		
-        var legend = svg.append("text")
+        let legend = svg.append("text")
             .attr("text-anchor", "star")
             .attr("y", 30)
-            .attr("x", width-100)
+            .attr("x", width - 100)
             .append("tspan").attr("class", "legend_title")
             .text(legend_values[0])
             .append("tspan").attr("class", "legend_text")
-            .attr("x", width-100).attr("dy", 20).text(legend_values[1])
+            .attr("x", width - 100).attr("dy", 20).text(legend_values[1])
             .append("tspan").attr("class", "legend_title")
-            .attr("x", width-100).attr("dy", 20).text(legend_values[2])
+            .attr("x", width - 100).attr("dy", 20).text(legend_values[2])
             .append("tspan").attr("class", "legend_text")
-            .attr("x", width-100).attr("dy", 20).text(legend_values[3]);
+            .attr("x", width - 100).attr("dy", 20).text(legend_values[3]);
     }
     else {
         svg.selectAll("line.horizontalGridY")
@@ -141,7 +141,7 @@ function drawLineChart(selection, data,x_label,y_label,legend_values,x_max,y_max
         .style("font-size","20px").style("fill","#bbb").style("font-weight","700");
 
     if (data[0].length > 0) {
-        var simulation = svg.selectAll(".simulation")
+        const simulation = svg.selectAll(".simulation")
             .data(data)
             .enter().append("g")
             .attr("class", "simulation");
@@ -164,54 +164,67 @@ function drawLineChart(selection, data,x_label,y_label,legend_values,x_max,y_max
 }
 
 function drawGrid(selection, data, colors) {
-    var width = 600;
-    var height = 600;
-    var grid_length = data.length;
+    const width = 600;
+    const height = 600;
+    const gridLength = data.length;
+    const rw = Math.floor(width / gridLength);
+    const rh = Math.floor(height / gridLength);
 
-    selection.selectAll(`*`).remove();
-    var svg = selection.append('svg')
-          .attr('width', width)
-          .attr('height', height);
+    // select or create the svg
+    const join = selection.selectAll(`svg`).data([data]);
+    const svg = join.enter().append('svg')
+        .merge(join);
 
-    var rw = Math.floor(width/grid_length);
-    var rh = Math.floor(height/grid_length);
+    // set svg dimensions
+    svg.attr(`width`, width)
+        .attr(`height`, height);
 
-    var g = svg.selectAll('g')
-            .data(data)
-            .enter()
-            .append('g')
-            .attr('transform', function (d, i) {
-              return 'translate(0, ' + (width/grid_length) * i + ')';
-            });
+    // correspond rows to data
+    const rowUpdate = svg.selectAll('g').data(data);
 
-    g.selectAll('rect')
-            .data(function (d) {
-              return d;
-            })
-            .enter()
-            .append('rect')
-            .attr('x', function (d, i) {
-              return (width/grid_length) * i;
-            })
-            .attr('width', rw)
-            .attr('height', rh)
-            .attr('class',function(d) {
-              return d;
-            });
+    // remove extraneous rows
+    rowUpdate.exit().remove();
+
+    // select rows, creating if necessary
+    const rows = rowUpdate.enter().append('g')
+        .attr('transform', function (d, i) {
+            return 'translate(0, ' + (width / gridLength) * i + ')';
+        })
+        .merge(rowUpdate);
+
+
+    const rectUpdate = rows.selectAll('rect')
+        .data(function (d) {
+            return d;
+        });
+
+    rectUpdate.exit().remove();
+
+    rectUpdate.enter().append('rect')
+        .attr('x', function (d, i) {
+              return (width/gridLength) * i;
+        })
+        .attr('width', rw)
+        .attr('height', rh)
+      .merge(rectUpdate)
+        .attr('class',function(d) {
+            return d;
+        });
+
     if (!colors) {
     	svg.selectAll(".A1A1").style("fill","#fff");
         svg.selectAll(".A1A2").style("fill","#2176c9");
         svg.selectAll(".A2A2").style("fill","#042029");
     }
     else {
-        for (var i = 0; i < colors.length; i = i + 2) {
+        for (let i = 0; i < colors.length; i = i + 2) {
             svg.selectAll("."+colors[i]).style("fill",colors[i+1]);
         }
     }
 }
 
 function updateGrid(selection, data, colors){
-    var grid_length = data.length;
+    let grid_length = data.length;
     let svg = selection.select(`svg`);
     svg.selectAll('g')
         .data(data)
@@ -228,7 +241,7 @@ function updateGrid(selection, data, colors){
         svg.selectAll(".A2A2").style("fill","#042029");
     }
     else {
-        for (var i = 0; i < colors.length; i = i + 2) {
+        for (let i = 0; i < colors.length; i = i + 2) {
             svg.selectAll("."+colors[i]).style("fill",colors[i+1]);
         }
     }
