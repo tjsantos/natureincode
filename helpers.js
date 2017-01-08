@@ -170,22 +170,17 @@ function drawGrid(selection, data, colors) {
     const rw = Math.floor(width / gridLength);
     const rh = Math.floor(height / gridLength);
 
-    // select or create the svg
-    const join = selection.selectAll(`svg`).data([data]);
-    const svg = join.enter().append('svg')
-        .merge(join);
-
-    // set svg dimensions
-    svg.attr(`width`, width)
-        .attr(`height`, height);
+    // select or create svg
+    const svgJoin = selection.selectAll(`svg`).data([data]);
+    const svg = svgJoin.enter().append('svg')
+        .attr(`width`, width)
+        .attr(`height`, height)
+        .merge(svgJoin);
 
     // correspond rows to data
     const rowUpdate = svg.selectAll('g').data(data);
 
-    // remove extraneous rows
-    rowUpdate.exit().remove();
-
-    // select rows, creating if necessary
+    // select or create rows
     const rows = rowUpdate.enter().append('g')
         .attr('transform', function (d, i) {
             return 'translate(0, ' + (width / gridLength) * i + ')';
@@ -198,8 +193,6 @@ function drawGrid(selection, data, colors) {
             return d;
         });
 
-    rectUpdate.exit().remove();
-
     rectUpdate.enter().append('rect')
         .attr('x', function (d, i) {
               return (width/gridLength) * i;
@@ -211,30 +204,6 @@ function drawGrid(selection, data, colors) {
             return d;
         });
 
-    if (!colors) {
-    	svg.selectAll(".A1A1").style("fill","#fff");
-        svg.selectAll(".A1A2").style("fill","#2176c9");
-        svg.selectAll(".A2A2").style("fill","#042029");
-    }
-    else {
-        for (let i = 0; i < colors.length; i = i + 2) {
-            svg.selectAll("."+colors[i]).style("fill",colors[i+1]);
-        }
-    }
-}
-
-function updateGrid(selection, data, colors){
-    let grid_length = data.length;
-    let svg = selection.select(`svg`);
-    svg.selectAll('g')
-        .data(data)
-        .selectAll('rect')
-        .data(function (d) {
-          return d;
-        })
-        .attr('class',function(d) {
-          return d;
-        });
     if (!colors) {
     	svg.selectAll(".A1A1").style("fill","#fff");
         svg.selectAll(".A1A2").style("fill","#2176c9");

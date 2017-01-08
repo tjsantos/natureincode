@@ -119,11 +119,7 @@
     }
 
     function render(selection, grid) {
-        if (grid.generationCounter === 0) {
-            drawGrid(selection, grid);
-        } else {
-            updateGrid(selection, grid);
-        }
+        drawGrid(selection, grid);
 
         const {A1A1, A1A2, A2A2} = grid;
         const F = calculateF(A1A1, A1A2, A2A2);
@@ -308,7 +304,7 @@
     function update(elapsed) {
         grid = nextGrid(grid);
         d3.select(`#epidemicsGrid`)
-            .call(updateGrid, grid, ["S","#dcdcdc","I","#c82605","R","#6fc041"]);
+            .call(drawGrid, grid, ["S","#dcdcdc","I","#c82605","R","#6fc041"]);
 
         console.log(elapsed, grid.infected);
         if (grid.infected === 0) {
