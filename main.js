@@ -270,9 +270,9 @@
     // state variables
     let grid;
     let gridLength = 75;
-    let pInfect = 0.10;
+    let pInfect = 0.05;
     let pRecover = 0.15;
-    let pInfectRandom = 0.07;
+    let pInfectRandom = 0.01;
     let interval = 200;
     let timer;
 
@@ -298,7 +298,7 @@
             timer.stop();
             timer = d3.interval(update, interval);
         });
-    
+
     // run
     // document.querySelector(`#epidemicsRestart`)
     //     .click();
@@ -310,7 +310,7 @@
         d3.select(`#epidemicsGrid`)
             .call(drawGrid, grid, [["S","#dcdcdc"],["I","#c82605"],["R","#6fc041"]]);
 
-        console.log(elapsed, grid.infected);
+        // console.log(elapsed, grid.infected);
         if (grid.infected === 0) {
             timer.stop();
         }
@@ -324,7 +324,9 @@
                grid[i][ii] = "S";
             }
         }
-        grid[getRandomInt(0,gridLength-1)][getRandomInt(0,gridLength-1)] = "I";
+        const rx = getRandomInt(0, gridLength - 1);
+        const ry = getRandomInt(0, gridLength - 1);
+        grid[rx][ry] = "I";
         grid.infected = 1;
         return grid;
     }
@@ -334,12 +336,14 @@
         let resultGrid = new Array(gridLength);
         for (let i = 0; i < gridLength; i = i + 1) {
             resultGrid[i] = new Array(gridLength);
+            for (let j = 0; j < gridLength; j += 1) {
+                resultGrid[i][j] = grid[i][j];
+            }
         }
         resultGrid.infected = 0;
 
         for (let i = 0; i < gridLength; i = i + 1) {
             for (let j = 0; j < gridLength; j = j + 1) {
-                resultGrid[i][j] = grid[i][j];
                 if (grid[i][j] === "I") {
                     // expose neighbors
                     for (let di of [-1, 0, 1]) {
