@@ -163,6 +163,13 @@ function drawLineChart(selection, data,x_label,y_label,legend_values,x_max,y_max
     svg.selectAll(".line").style("fill", "none").style("stroke-width","1.5px");
 }
 
+/**
+ * Render a grid from a 2d-array of data
+ *
+ * @param selection d3 selection to draw the grid in
+ * @param data
+ * @param colors    iterable of [class, color] strings (can be a Map or a suitable Array)
+ */
 function drawGrid(selection, data, colors) {
     const width = 600;
     const height = 600;
@@ -204,14 +211,7 @@ function drawGrid(selection, data, colors) {
             return d;
         });
 
-    if (!colors) {
-    	svg.selectAll(".A1A1").style("fill","#fff");
-        svg.selectAll(".A1A2").style("fill","#2176c9");
-        svg.selectAll(".A2A2").style("fill","#042029");
-    }
-    else {
-        for (let i = 0; i < colors.length; i = i + 2) {
-            svg.selectAll("."+colors[i]).style("fill",colors[i+1]);
-        }
+    for (let [cls, color] of colors) {
+        svg.selectAll("."+cls).style("fill", color);
     }
 }

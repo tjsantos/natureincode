@@ -119,7 +119,12 @@
     }
 
     function render(selection, grid) {
-        drawGrid(selection, grid);
+        const colors = [
+            [`A1A1`, `#fff`],
+            [`A1A2`, `#2176c9`],
+            [`A2A2`, `#042029`]
+        ];
+        drawGrid(selection, grid, colors);
 
         const {A1A1, A1A2, A2A2} = grid;
         const F = calculateF(A1A1, A1A2, A2A2);
@@ -265,9 +270,9 @@
     // state variables
     let grid;
     let gridLength = 75;
-    let pInfect = 0.05;
+    let pInfect = 0.10;
     let pRecover = 0.15;
-    let pInfectRandom = 0.01;
+    let pInfectRandom = 0.07;
     let interval = 200;
     let timer;
 
@@ -276,7 +281,7 @@
         .addEventListener(`click`, function (event) {
             grid = newGrid(gridLength);
             d3.select(`#epidemicsGrid`)
-                .call(drawGrid, grid,["S","#dcdcdc","I","#c82605","R","#6fc041"]);
+                .call(drawGrid, grid,[["S","#dcdcdc"],["I","#c82605"],["R","#6fc041"]]);
             if (timer) timer.stop();
             timer = d3.interval(update, interval);
         });
@@ -293,8 +298,7 @@
             timer.stop();
             timer = d3.interval(update, interval);
         });
-
-
+    
     // run
     // document.querySelector(`#epidemicsRestart`)
     //     .click();
@@ -304,7 +308,7 @@
     function update(elapsed) {
         grid = nextGrid(grid);
         d3.select(`#epidemicsGrid`)
-            .call(drawGrid, grid, ["S","#dcdcdc","I","#c82605","R","#6fc041"]);
+            .call(drawGrid, grid, [["S","#dcdcdc"],["I","#c82605"],["R","#6fc041"]]);
 
         console.log(elapsed, grid.infected);
         if (grid.infected === 0) {
