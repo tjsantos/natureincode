@@ -119,12 +119,12 @@
     }
 
     function render(selection, grid) {
-        const colors = [
-            [`.A1A1`, `#fff`],
-            [`.A1A2`, `#2176c9`],
-            [`.A2A2`, `#042029`]
-        ];
-        drawGrid(selection, grid, colors);
+        const colors = new Map([
+            [`A1A1`, `#fff`],
+            [`A1A2`, `#2176c9`],
+            [`A2A2`, `#042029`]
+        ]);
+        drawGrid(selection, grid, (d) => colors.get(d));
 
         const {A1A1, A1A2, A2A2} = grid;
         const F = calculateF(A1A1, A1A2, A2A2);
@@ -275,13 +275,14 @@
     let pInfectRandom = 0.01;
     let interval = 200;
     let timer;
+    const colors = new Map([["S","#dcdcdc"],["I","#c82605"],["R","#6fc041"]]);
 
     // inputs
     document.querySelector(`#epidemicsRestart`)
         .addEventListener(`click`, function (event) {
             grid = newGrid(gridLength);
             d3.select(`#epidemicsGrid`)
-                .call(drawGrid, grid,[[".S","#dcdcdc"],[".I","#c82605"],[".R","#6fc041"]]);
+                .call(drawGrid, grid, (d) => colors.get(d));
             if (timer) timer.stop();
             timer = d3.interval(update, interval);
         });
@@ -308,7 +309,7 @@
     function update(elapsed) {
         grid = nextGrid(grid);
         d3.select(`#epidemicsGrid`)
-            .call(drawGrid, grid, [[".S","#dcdcdc"],[".I","#c82605"],[".R","#6fc041"]]);
+            .call(drawGrid, grid, (d) => colors.get(d));
 
         // console.log(elapsed, grid.infected);
         if (grid.infected === 0) {
@@ -348,21 +349,22 @@
                     // expose neighbors
                     for (let di of [-1, 0, 1]) {
                         for (let dj of [-1, 0, 1]) {
-                            const ni = getBoundedIndex(i + di, gridLength);
-                            const nj = getBoundedIndex(j + dj, gridLength);
+                            let ni, nj;
+                            // one neighbor might be long distance
+                            if (Math.random() < pInfectRandom) {
+                                ni = getRandomInt(0, gridLength - 1);
+                                nj = getRandomInt(0, gridLength - 1);
+                            } else {
+                                ni = getBoundedIndex(i + di, gridLength);
+                                nj = getBoundedIndex(j + dj, gridLength);
+                            }
+
                             if (grid[ni][nj] === "S" && Math.random() < pInfect) {
                                 resultGrid[ni][nj] = "I";
                             }
                         }
                     }
-                    // long distance transmission
-                    if (Math.random() < pInfectRandom) {
-                        const ri = getRandomInt(0, gridLength - 1);
-                        const rj = getRandomInt(0, gridLength - 1);
-                        if (grid[ri][rj] === `S`) {
-                            resultGrid[ri][rj] = `I`;
-                        }
-                    }
+
                     // attempt recovery
                     if (Math.random() < pRecover) {
                         resultGrid[i][j] = `R`;

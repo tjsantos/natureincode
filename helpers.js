@@ -168,9 +168,9 @@ function drawLineChart(selection, data,x_label,y_label,legend_values,x_max,y_max
  *
  * @param selection d3 selection to draw the grid in
  * @param data
- * @param colors    iterable of [selector, color] strings (can be a Map or a suitable Array)
+ * @param colorMap    function that maps data to colors
  */
-function drawGrid(selection, data, colors) {
+function drawGrid(selection, data, colorMap) {
     const width = 600;
     const height = 600;
     const gridLength = data.length;
@@ -200,9 +200,5 @@ function drawGrid(selection, data, colors) {
         .attr('width', rw)
         .attr('height', rh)
       .merge(rectUpdate)
-        .attr('class', d => d);
-
-    for (let [selector, color] of colors) {
-        svg.selectAll(selector).style(`fill`, color);
-    }
+        .style(`fill`, colorMap);
 }
