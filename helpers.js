@@ -168,7 +168,7 @@ function drawLineChart(selection, data,x_label,y_label,legend_values,x_max,y_max
  *
  * @param selection d3 selection to draw the grid in
  * @param data
- * @param colors    iterable of [class, color] strings (can be a Map or a suitable Array)
+ * @param colors    iterable of [selector, color] strings (can be a Map or a suitable Array)
  */
 function drawGrid(selection, data, colors) {
     const width = 600;
@@ -189,29 +189,20 @@ function drawGrid(selection, data, colors) {
 
     // select or create rows
     const rows = rowUpdate.enter().append('g')
-        .attr('transform', function (d, i) {
-            return 'translate(0, ' + (width / gridLength) * i + ')';
-        })
+        .attr('transform', (d, i) => `translate(0, ${rh * i})` )
         .merge(rowUpdate);
 
-
     const rectUpdate = rows.selectAll('rect')
-        .data(function (d) {
-            return d;
-        });
+        .data(d => d);  // join data from parent (rows)
 
     rectUpdate.enter().append('rect')
-        .attr('x', function (d, i) {
-              return (width/gridLength) * i;
-        })
+        .attr('x', (d, i) => rw * i)
         .attr('width', rw)
         .attr('height', rh)
       .merge(rectUpdate)
-        .attr('class',function(d) {
-            return d;
-        });
+        .attr('class', d => d);
 
-    for (let [cls, color] of colors) {
-        svg.selectAll("."+cls).style("fill", color);
+    for (let [selector, color] of colors) {
+        svg.selectAll(selector).style(`fill`, color);
     }
 }

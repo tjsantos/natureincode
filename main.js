@@ -120,9 +120,9 @@
 
     function render(selection, grid) {
         const colors = [
-            [`A1A1`, `#fff`],
-            [`A1A2`, `#2176c9`],
-            [`A2A2`, `#042029`]
+            [`.A1A1`, `#fff`],
+            [`.A1A2`, `#2176c9`],
+            [`.A2A2`, `#042029`]
         ];
         drawGrid(selection, grid, colors);
 
@@ -281,7 +281,7 @@
         .addEventListener(`click`, function (event) {
             grid = newGrid(gridLength);
             d3.select(`#epidemicsGrid`)
-                .call(drawGrid, grid,[["S","#dcdcdc"],["I","#c82605"],["R","#6fc041"]]);
+                .call(drawGrid, grid,[[".S","#dcdcdc"],[".I","#c82605"],[".R","#6fc041"]]);
             if (timer) timer.stop();
             timer = d3.interval(update, interval);
         });
@@ -308,7 +308,7 @@
     function update(elapsed) {
         grid = nextGrid(grid);
         d3.select(`#epidemicsGrid`)
-            .call(drawGrid, grid, [["S","#dcdcdc"],["I","#c82605"],["R","#6fc041"]]);
+            .call(drawGrid, grid, [[".S","#dcdcdc"],[".I","#c82605"],[".R","#6fc041"]]);
 
         // console.log(elapsed, grid.infected);
         if (grid.infected === 0) {
