@@ -80,8 +80,7 @@
     document.querySelector(`#migrationRestart`)
         .addEventListener(`click`, function (event) {
             // make restart button an input event (state variables should update)
-            event.currentTarget.form.dispatchEvent(new Event(`input`));
-
+            // event.currentTarget.form.dispatchEvent(new Event(`input`));
             restart(gridLength, p);
         });
     document.querySelector(`#migrationPause`)
@@ -94,17 +93,15 @@
             }
         });
 
-    // run the simulation
-
-    // document.querySelector(`#migrationRestart`)
-    //     .click();
+    // initial view, paused
+    grid = initGrid(gridLength, p);
+    render();
 
     // helper functions
 
     function restart(gridLength, p) {
         grid = initGrid(gridLength, p);
-        d3.select(`#migrationGrid`)
-            .call(render, grid);
+        render();
 
         clearTimeout(eventId);
         eventId = setTimeout(update, interval);
@@ -112,19 +109,19 @@
 
     function update() {
         grid = nextGrid(grid, matingDistance);
-        d3.select(`#migrationGrid`)
-            .call(render, grid);
+        render();
 
         eventId = setTimeout(update, interval);
     }
 
-    function render(selection, grid) {
+    function render() {
         const colors = new Map([
             [`A1A1`, `#fff`],
             [`A1A2`, `#2176c9`],
             [`A2A2`, `#042029`]
         ]);
-        drawGrid(selection, grid, (d) => colors.get(d));
+        d3.select(`#migrationGrid`)
+            .call(drawGrid, grid, (d) => colors.get(d));
 
         const {A1A1, A1A2, A2A2} = grid;
         const F = calculateF(A1A1, A1A2, A2A2);
@@ -255,12 +252,6 @@
         const F = (h_e - h_o) / h_e;
         return F;
     }
-
-    function roundApprox(n, decimals) {
-        const shifter = Math.pow(10, decimals);
-        return Math.round(n * shifter) / shifter;
-    }
-
 })();
 
 
@@ -281,8 +272,8 @@
     document.querySelector(`#epidemicsRestart`)
         .addEventListener(`click`, function (event) {
             grid = newGrid(gridLength);
-            d3.select(`#epidemicsGrid`)
-                .call(drawGrid, grid, (d) => colors.get(d));
+            render();
+
             if (timer) timer.stop();
             timer = d3.interval(update, interval);
         });
@@ -300,21 +291,26 @@
             timer = d3.interval(update, interval);
         });
 
-    // run
-    // document.querySelector(`#epidemicsRestart`)
-    //     .click();
+    // initial view, paused
+    grid = newGrid(gridLength);
+    render();
 
     // helper functions
 
     function update(elapsed) {
         grid = nextGrid(grid);
+        render();
+
+        if (grid.infected === 0) {
+            timer.stop();
+        }
+    }
+
+    function render() {
         d3.select(`#epidemicsGrid`)
             .call(drawGrid, grid, (d) => colors.get(d));
 
         // console.log(elapsed, grid.infected);
-        if (grid.infected === 0) {
-            timer.stop();
-        }
     }
 
     function newGrid(gridLength) {
