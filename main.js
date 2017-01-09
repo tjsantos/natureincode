@@ -272,7 +272,7 @@
     let gridLength = 75;
     let pInfect = 0.05;
     let pRecover = 0.15;
-    let pInfectRandom = 0.01;
+    let pRandomNeighbor = 0.01;
     let interval = 200;
     let timer;
     const colors = new Map([["S","#dcdcdc"],["I","#c82605"],["R","#6fc041"]]);
@@ -333,25 +333,30 @@
     }
 
     function nextGrid(grid) {
+        // possible state transitions: S -> {S, I}, I -> {I, R}, R -> R
         const gridLength = grid.length;
         let resultGrid = new Array(gridLength);
         for (let i = 0; i < gridLength; i = i + 1) {
-            resultGrid[i] = new Array(gridLength);
-            for (let j = 0; j < gridLength; j += 1) {
-                resultGrid[i][j] = grid[i][j];
-            }
+            // default state, covers (S -> S) when not overwritten
+            resultGrid[i] = new Array(gridLength).fill(`S`);
         }
         resultGrid.infected = 0;
 
         for (let i = 0; i < gridLength; i = i + 1) {
             for (let j = 0; j < gridLength; j = j + 1) {
-                if (grid[i][j] === "I") {
-                    // expose neighbors
+                const status = grid[i][j];
+                if (status === `R`) {
+                    // covers (R -> R)
+                    resultGrid[i][j] = `R`;
+                } else if (status === `I`) {
+                    // expose neighbors, covers (S -> I)
                     for (let di of [-1, 0, 1]) {
                         for (let dj of [-1, 0, 1]) {
+                            if (di === 0 && dj === 0) continue;
+
                             let ni, nj;
                             // one neighbor might be long distance
-                            if (Math.random() < pInfectRandom) {
+                            if (Math.random() < pRandomNeighbor) {
                                 ni = getRandomInt(0, gridLength - 1);
                                 nj = getRandomInt(0, gridLength - 1);
                             } else {
@@ -360,22 +365,21 @@
                             }
 
                             if (grid[ni][nj] === "S" && Math.random() < pInfect) {
-                                resultGrid[ni][nj] = "I";
+                                if (resultGrid[ni][nj] !== `I`) {
+                                    resultGrid[ni][nj] = "I";
+                                    resultGrid.infected += 1;
+                                }
                             }
                         }
                     }
 
-                    // attempt recovery
+                    // attempt recovery, covers (I -> {I, R})
                     if (Math.random() < pRecover) {
                         resultGrid[i][j] = `R`;
+                    } else {
+                        resultGrid[i][j] = `I`;
+                        resultGrid.infected += 1;
                     }
-                }
-            }
-        }
-        for (let i = 0; i < gridLength; i = i + 1) {
-            for (let j = 0; j < gridLength; j = j + 1) {
-                if (grid[i][j] === `I`) {
-                    resultGrid.infected += 1;
                 }
             }
         }
