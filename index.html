@@ -3,12 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>Nature in Code</title>
-
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .container {
+            max-width: 730px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        article {
+            border-top: 1px solid black;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+    </style>
     <script defer src="https://d3js.org/d3.v4.min.js"></script>
     <script defer src="helpers.js"></script>
     <script defer src="main.js"></script>
 </head>
 <body>
+<div class="container">
 <article id="geneticDrift">
     <header>
         <h2>Genetic Drift</h2>
@@ -63,5 +79,6 @@
         <button id="epidemicsRestart" type="button">Restart</button>
     </form>
 </article>
+</div>
 </body>
 </html>
