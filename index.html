@@ -2,21 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Nature in Code</title>
+    <title>Nature in Code Simulations</title>
     <style>
         body {
             padding-top: 20px;
             padding-bottom: 20px;
+            font-family: "Open Sans", Arial, Helvetica, Sans-Serif;
         }
         .container {
             max-width: 730px;
             margin-left: auto;
             margin-right: auto;
+            text-align: center;
         }
         article {
             border-top: 1px solid black;
             margin-bottom: 40px;
-            text-align: center;
         }
     </style>
     <script defer src="https://d3js.org/d3.v4.min.js"></script>
@@ -25,10 +26,9 @@
 </head>
 <body>
 <div class="container">
+    <h1><a href="http://www.natureincode.com/">Nature in Code</a> Simulations</h1>
 <article id="geneticDrift">
-    <header>
-        <h2>Genetic Drift</h2>
-    </header>
+    <h2>Genetic Drift</h2>
     <p>
         This graph shows the frequency of a neutral allele (p) over time,
         based on a "one locus, two alleles" model.
@@ -43,9 +43,7 @@
     </form>
 </article>
 <article id="migration">
-    <header>
-        <h2>Migration</h2>
-    </header>
+    <h2>Migration</h2>
     <p>
         When individuals mate with genetically similar individuals, inbreeding is the consequence.
         In this stochastic, individual-based spatial simulation, individuals can only mate with their immediate local neighbors.
