@@ -290,6 +290,15 @@
             timer.stop();
             timer = d3.interval(update, interval);
         });
+    document.querySelector(`#epidemicsPause`)
+        .addEventListener(`click`, function (event) {
+            if (timer) {
+                timer.stop();
+                timer = null;
+            } else {
+                timer = d3.interval(update, interval);
+            }
+        });
 
     // initial view, paused
     grid = newGrid(gridLength);
