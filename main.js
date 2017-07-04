@@ -80,7 +80,7 @@
     document.querySelector(`#migrationRestart`)
         .addEventListener(`click`, function (event) {
             // make restart button an input event (state variables should update)
-            // event.currentTarget.form.dispatchEvent(new Event(`input`));
+            event.currentTarget.form.dispatchEvent(new Event(`input`));
             restart(gridLength, p);
         });
     document.querySelector(`#migrationPause`)
